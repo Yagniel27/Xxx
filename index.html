@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preventa Oficial - Proyecto</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.3.0/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top, #141414, #000);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 50px 20px;
+    }
+
+    #walletInfo {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      background: rgba(255,255,255,0.05);
+      padding: 8px 15px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(5px);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 40px 25px;
+      max-width: 400px;
+      margin: 80px auto 0 auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #bbb;
+      font-size: 0.95em;
+    }
+
+    input {
+      width: 80%;
+      padding: 12px;
+      margin: 15px 0;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 1.1em;
+      text-align: center;
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    button {
+      background: linear-gradient(90deg, #00ffa3, #0072ff);
+      border: none;
+      border-radius: 15px;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 85%;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px #00ffa3;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 0.9em;
+      color: #00ffa3;
+    }
+
+    #balance {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #00ffd0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Wallet conectado -->
+  <div id="walletInfo">Conectando wallet...</div>
+
+  <div class="card">
+    <h2>🚀 Preventa Oficial</h2>
+    <p>Introduce la cantidad que deseas aportar (ETH / BNB)</p>
+    <input type="number" id="amount" placeholder="Ej: 0.2">
+    <br>
+    <button onclick="participar()">Participar</button>
+    <p id="status"></p>
+    <p id="balance"></p>
+  </div>
+
+  <script>
+    const walletProyecto = "0xTuWalletAqui"; // 🔹 Reemplaza con tu wallet
+    let signer;
+    let provider;
+
+    // función para conectar la wallet al cargar
+    async function conectarWallet() {
+      if (!window.ethereum) {
+        alert("Necesitas Metamask o Trust Wallet");
+        document.getElementById("walletInfo").innerText = "Wallet no detectada";
+        return;
+      }
+
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = await provider.getSigner();
+      const address = await signer.getAddress();
+
+      // mostrar dirección acortada
+      const shortAddr = address.slice(0,6) + "…" + address.slice(-4);
+      document.getElementById("walletInfo").innerText = `${shortAddr} ✓ Conectado`;
+
+      // mostrar saldo
+      await mostrarSaldo();
+    }
+
+    // función para mostrar el saldo en ETH/BNB
+    async function mostrarSaldo() {
+      const address = await signer.getAddress();
+      const balanceWei = await provider.getBalance(address);
+      const balanceEth = ethers.formatEther(balanceWei);
+
+      document.getElementById("balance").innerText = `Saldo disponible: ${balanceEth} ETH/BNB`;
+    }
+
+    // función para enviar fondos
+    async function participar() {
+      try {
+        const status = document.getElementById("status");
+        const cantidad = document.getElementById("amount").value;
+
+        if (!signer) {
+          await conectarWallet();
+        }
+
+        if (!cantidad || cantidad <= 0) {
+          status.innerText = "❗ Ingresa una cantidad válida.";
+          return;
+        }
+
+        const tx = await signer.sendTransaction({
+          to: walletProyecto,
+          value: ethers.parseEther(cantidad)
+        });
+
+        status.innerText = "⏳ Enviando transacción...";
+        await tx.wait();
+        status.innerText = "✅ ¡Transacción completada correctamente!";
+
+        // actualizar saldo luego de enviar
+        await mostrarSaldo();
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "❌ Error o transacción cancelada.";
+      }
+    }
+
+    // conectar automáticamente al cargar
+    window.addEventListener('load', async () => {
+      if (window.ethereum) {
+        await conectarWallet();
+      } else {
+        document.getElementById("walletInfo").innerText = "Wallet no detectada";
+      }
+    });
+  </script>
+</body>
+</html>
