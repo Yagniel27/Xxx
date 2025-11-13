@@ -110,75 +110,462 @@
     let provider;
 
     // función para conectar la wallet al cargar
-    async function conectarWallet() {
-      if (!window.ethereum) {
-        alert("Necesitas Metamask o Trust Wallet");
-        document.getElementById("walletInfo").innerText = "Wallet no detectada";
-        return;
-      }
-
-      provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      signer = await provider.getSigner();
-      const address = await signer.getAddress();
-
-      // mostrar dirección acortada
-      const shortAddr = address.slice(0,6) + "…" + address.slice(-4);
-      document.getElementById("walletInfo").innerText = `${shortAddr} ✓ Conectado`;
-
-      // mostrar saldo
-      await mostrarSaldo();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LunaCore • Preventa</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.3.0/dist/ethers.umd.min.js"></script>
+  <style>
+    :root{
+      --bg1:#07070b;
+      --bg2:#0f1220;
+      --glass: rgba(255,255,255,0.04);
+      --accent1: #7af3c6;
+      --accent2: #6aa8ff;
+      --muted: #9aa3b2;
+      --card-radius: 18px;
+      --maxw: 1100px;
+      --container-padding: 20px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,var(--bg1),var(--bg2));
+      color: #eaf2ff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      padding:30px 16px;
+      display:flex;
+      justify-content:center;
+    }
+    .wrap{
+      width:100%;
+      max-width:var(--maxw);
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:24px;
+    }
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:48px;height:48px;border-radius:12px;
+      background: linear-gradient(135deg,var(--accent1),var(--accent2));
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#041024;
+      box-shadow:0 6px 30px rgba(106,168,255,0.08),0 3px 8px rgba(122,243,198,0.04);
+    }
+    .title{font-weight:700;font-size:1.05rem}
+    nav{display:flex;gap:12px;align-items:center}
+    .small-btn{
+      padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);
+      font-size:0.9rem;color:var(--muted)
     }
 
-    // función para mostrar el saldo en ETH/BNB
-    async function mostrarSaldo() {
-      const address = await signer.getAddress();
-      const balanceWei = await provider.getBalance(address);
-      const balanceEth = ethers.formatEther(balanceWei);
+    /* wallet chip */
+    #walletInfo{
+      padding:8px 12px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
+      font-size:0.9rem;color:#dffcf0;backdrop-filter:blur(6px);
+      display:flex;gap:8px;align-items:center;
+    }
+    #walletInfo .dot{width:8px;height:8px;border-radius:50%;background:#00ffad;box-shadow:0 0 6px #00ffad}
 
-      document.getElementById("balance").innerText = `Saldo disponible: ${balanceEth} ETH/BNB`;
+    /* main layout */
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:24px;
+      align-items:start;
     }
 
-    // función para enviar fondos
-    async function participar() {
-      try {
-        const status = document.getElementById("status");
-        const cantidad = document.getElementById("amount").value;
+    /* left column (info) */
+    .hero{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: var(--card-radius);
+      padding:28px;
+      border: 1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 10px 40px rgba(6,10,20,0.6);
+      overflow:hidden;
+    }
+    .hero h1{margin:0;font-size:1.8rem;letter-spacing:-0.5px}
+    .muted{color:var(--muted);margin-top:8px;}
+    .grid-2{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px;
+    }
+    .panel{
+      background:var(--glass);padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);
+    }
+    .panel h3{margin:0;font-size:0.95rem}
+    .panel p{margin:8px 0 0;color:var(--muted);font-size:0.9rem}
 
-        if (!signer) {
-          await conectarWallet();
+    /* presale card (right column) */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius: var(--card-radius);
+      padding:20px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+      position:sticky; top:26px;
+    }
+    .card h2{margin:0;font-size:1.15rem}
+    .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
+    .price{font-weight:700}
+    .meta{color:var(--muted);font-size:0.9rem}
+
+    input[type=number]{
+      width:100%;padding:12px;border-radius:12px;border:none;outline:none;margin-top:12px;
+      background: rgba(255,255,255,0.02); color: #e9f7ff; font-size:1rem;
+    }
+    .btn{
+      width:100%;padding:12px;margin-top:12px;border-radius:12px;border:none;font-weight:700;font-size:1rem;cursor:pointer;
+      background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#041024;
+      box-shadow:0 8px 30px rgba(106,168,255,0.08);
+    }
+    .status{margin-top:10px;font-size:0.95rem;color:var(--accent1)}
+
+    /* progress & timer */
+    .progress-wrap{margin-top:14px}
+    .bar{width:100%;height:12px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .bar-fill{height:100%;width:30%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width 600ms cubic-bezier(.2,.8,.2,1)}
+    .small{font-size:0.85rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between}
+
+    /* footer sections */
+    .section{margin-top:22px}
+    .tokonomics{display:flex;gap:12px;flex-wrap:wrap}
+    .tbox{flex:1;min-width:150px;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+
+    footer{margin-top:30px;color:var(--muted);font-size:0.9rem;text-align:center}
+
+    /* responsive */
+    @media (max-width:980px){
+      .grid{grid-template-columns:1fr; padding-bottom:60px}
+      .card{position:relative;top:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">LC</div>
+        <div>
+          <div class="title">LunaCore</div>
+          <div class="muted" style="font-size:0.85rem">Token • Preventa Fase 1</div>
+        </div>
+      </div>
+
+      <nav>
+        <div class="small-btn">Tokenomics</div>
+        <div class="small-btn">Roadmap</div>
+        <div id="walletInfo">Conectando wallet...</div>
+      </nav>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: info -->
+      <section class="hero">
+        <h1>LunaCore — Token de infraestructura para IA on-chain</h1>
+        <p class="muted">Ecosistema tokenizado para modelos de IA verificados. Preventa exclusiva: fase 1 con bonificaciones por early adopters.</p>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Oferta total</h3>
+            <p>1,000,000 LCore</p>
+          </div>
+          <div class="panel">
+            <h3>Red</h3>
+            <p>Compatible con Ethereum y Binance Smart Chain (selecciona en tu wallet)</p>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 style="margin-bottom:8px">¿Por qué LunaCore?</h3>
+          <p class="muted">LunaCore permite a desarrolladores desplegar modelos de IA en cadena con oráculos descentralizados y micropagos por consulta.</p>
+        </div>
+
+        <div class="section">
+          <h3>Roadmap</h3>
+          <div class="tokonomics" style="margin-top:10px">
+            <div class="tbox">
+              <strong>Q3 2025</strong>
+              <div class="muted">Preventa & auditoría inicial</div>
+            </div>
+            <div class="tbox">
+              <strong>Q4 2025</strong>
+              <div class="muted">Mainnet beta & partnerships</div>
+            </div>
+            <div class="tbox">
+              <strong>Q1 2026</strong>
+              <div class="muted">Listing & staking</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Tokenomics</h3>
+          <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+            <div class="tbox"><strong>Preventa</strong><div class="muted">25%</div></div>
+            <div class="tbox"><strong>Liquidity</strong><div class="muted">30%</div></div>
+            <div class="tbox"><strong>Equipo</strong><div class="muted">15% (vested)</div></div>
+            <div class="tbox"><strong>Marketing</strong><div class="muted">10%</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>FAQ</h3>
+          <p class="muted">¿Cuándo recibiré los tokens? → Al finalizar la preventa y creación del token. ¿Puedo usar ETH o BNB? → Sí, la wallet detectará la red.</p>
+        </div>
+
+      </section>
+
+      <!-- RIGHT: presale card -->
+      <aside class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h2>🚀 Preventa — Fase 1</h2>
+            <div class="meta">Bonificación: 10% (early)</div>
+          </div>
+          <div style="text-align:right">
+            <div class="meta">Precio</div>
+            <div class="price">1 LCore = 0.002 ETH</div>
+          </div>
+        </div>
+
+        <div class="price-row" style="margin-top:12px">
+          <div class="meta">Disponible en preventa</div>
+          <div class="meta" id="networkLabel">Red: —</div>
+        </div>
+
+        <div style="margin-top:12px">
+          <input id="amount" type="number" min="0" step="0.001" placeholder="Ej: 0.1" />
+          <button class="btn" id="buyBtn">Participar</button>
+          <div class="status" id="status">Estado: esperando conexión...</div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="bar"><div class="bar-fill" id="barFill" style="width:28%"></div></div>
+          <div class="small">
+            <div id="raisedTxt">Recaudado: 28,000 USDT (simulado)</div>
+            <div id="goalTxt">Meta: 100,000 USDT</div>
+          </div>
+          <div style="margin-top:8px" class="meta">Tiempo restante: <strong id="countdown">—</strong></div>
+        </div>
+
+        <div style="margin-top:12px;font-size:0.92rem">
+          <div class="meta">Wallet destino:</div>
+          <div id="projectWallet" style="word-break:break-all;font-weight:700;margin-top:6px">0x1111111111111111111111111111111111111111</div>
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="meta">Tu saldo:</div>
+          <div id="balance">—</div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div style="opacity:0.9">Proyecto ficticio para previsualización • No envíes fondos reales a menos que verifiques la wallet del proyecto.</div>
+    </footer>
+  </div>
+
+  <script>
+    // -------------------------
+    // CONFIGURACIÓN (edita si quieres)
+    // -------------------------
+    // Dirección del proyecto (ficticia aquí). Reemplaza por tu dirección real cuando publiques.
+    const walletProyecto = "0x1111111111111111111111111111111111111111";
+    // Fecha de fin de preventa (a futuro) para el contador (YYYY, M-1, D, H, M, S)
+    const saleEndDate = new Date(Date.now() + 1000*60*60*24*7); // +7 días desde carga (demo)
+    // Datos simulados de recaudación (solo para UI)
+    let simulatedRaisedUSD = 28000;
+    const simulatedGoalUSD = 100000;
+
+    // -------------------------
+    // UTILIDADES
+    // -------------------------
+    const $ = (id)=> document.getElementById(id);
+    function short(addr){ if(!addr) return '—'; return addr.slice(0,6)+'…'+addr.slice(-4); }
+    function nice(n,dec=4){ return Number(n).toLocaleString(undefined,{maximumFractionDigits:dec}); }
+
+    // -------------------------
+    // Ethers / Wallet logic
+    // -------------------------
+    let provider, signer, currentAddress;
+    const networkNames = {
+      1: 'Ethereum',
+      3: 'Ropsten',
+      4: 'Rinkeby',
+      5: 'Goerli',
+      56: 'BSC',
+      97: 'BSC Test',
+      137: 'Polygon'
+    };
+
+    async function init() {
+      // show project wallet
+      $('projectWallet').innerText = walletProyecto;
+
+      // set initial UI
+      $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`;
+      $('goalTxt').innerText = `Meta: $${simulatedGoalUSD.toLocaleString()}`;
+      updateProgressBar();
+
+      // countdown
+      startCountdown();
+
+      // try connect if wallet present
+      if(window.ethereum){
+        try {
+          provider = new ethers.BrowserProvider(window.ethereum);
+          // if user already connected, request accounts; else still attempt to request but avoid popup under some wallets
+          await provider.send("eth_requestAccounts", []);
+          signer = await provider.getSigner();
+          currentAddress = await signer.getAddress();
+          await updateConnectedUI();
+        } catch(err){
+          // user may have rejected or wallet blocks auto-request
+          $('walletInfo').innerText = 'Conectar wallet';
+          $('status').innerText = 'Estado: por favor conecta tu wallet (botón de la app).';
         }
+        // listen to account / chain changes
+        try {
+          window.ethereum.on && window.ethereum.on('accountsChanged', handleAccountsChanged);
+          window.ethereum.on && window.ethereum.on('chainChanged', handleChainChanged);
+        } catch(e){}
+      } else {
+        $('walletInfo').innerText = 'Wallet no detectada';
+        $('status').innerText = 'Estado: abre esta página dentro del navegador de MetaMask/Trust Wallet.';
+      }
+    }
 
-        if (!cantidad || cantidad <= 0) {
-          status.innerText = "❗ Ingresa una cantidad válida.";
+    async function updateConnectedUI(){
+      if(!signer) return;
+      currentAddress = await signer.getAddress();
+      $('walletInfo').innerHTML = `<div style="display:flex;align-items:center;gap:8px"><div class="dot"></div>${short(currentAddress)} ✓ Conectado</div>`;
+      // network
+      const net = await provider.getNetwork();
+      const netName = networkNames[net.chainId] || ('Chain '+net.chainId);
+      $('networkLabel').innerText = `Red: ${netName}`;
+      // balance
+      const bal = await provider.getBalance(currentAddress);
+      const balEth = ethers.formatEther(bal);
+      $('balance').innerText = `${nice(balEth,6)} ${netName==='BSC' || net.chainId===56 ? 'BNB' : 'ETH'}`;
+      $('status').innerText = 'Estado: wallet conectada. Listo para participar.';
+    }
+
+    async function handleAccountsChanged(accounts){
+      if(!accounts || accounts.length===0){
+        // disconnected
+        signer = null; currentAddress = null;
+        $('walletInfo').innerText = 'Wallet desconectada';
+        $('status').innerText = 'Estado: wallet desconectada.';
+        $('balance').innerText = '—';
+      } else {
+        // update signer/provider and UI
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        await updateConnectedUI();
+      }
+    }
+
+    async function handleChainChanged(){
+      // chain changed -> update network label and balance
+      if(provider && signer) await updateConnectedUI();
+    }
+
+    // -------------------------
+    // BUY / SEND TX
+    // -------------------------
+    async function participate(){
+      try {
+        if(!window.ethereum){
+          alert('No se detectó wallet. Abre esta página dentro del navegador de MetaMask o Trust Wallet.');
           return;
         }
+        if(!signer){
+          provider = new ethers.BrowserProvider(window.ethereum);
+          await provider.send("eth_requestAccounts", []);
+          signer = await provider.getSigner();
+          await updateConnectedUI();
+        }
+        const raw = document.querySelector('#amount').value;
+        const amount = Number(raw);
+        if(!amount || amount <= 0){ $('status').innerText = '❗ Ingresa una cantidad válida.'; return; }
 
+        $('status').innerText = '⏳ Enviando transacción...';
+        // parse amount as native currency (ETH/BNB)
         const tx = await signer.sendTransaction({
           to: walletProyecto,
-          value: ethers.parseEther(cantidad)
+          value: ethers.parseEther(amount.toString())
         });
-
-        status.innerText = "⏳ Enviando transacción...";
+        // wait for confirm
         await tx.wait();
-        status.innerText = "✅ ¡Transacción completada correctamente!";
-
-        // actualizar saldo luego de enviar
-        await mostrarSaldo();
-      } catch (err) {
-        console.error(err);
-        document.getElementById("status").innerText = "❌ Error o transacción cancelada.";
+        $('status').innerText = '✅ Transacción completada. ¡Gracias por participar!';
+        // update simulated raised (just for demo): add amount * fake price
+        simulateRaised(amount);
+        // refresh balance
+        await updateConnectedUI();
+      } catch(e){
+        console.error(e);
+        $('status').innerText = '❌ Error o transacción cancelada.';
       }
     }
 
-    // conectar automáticamente al cargar
-    window.addEventListener('load', async () => {
-      if (window.ethereum) {
-        await conectarWallet();
-      } else {
-        document.getElementById("walletInfo").innerText = "Wallet no detectada";
-      }
+    // attach buy button
+    document.addEventListener('DOMContentLoaded', ()=>{
+      $('buyBtn').addEventListener('click', participate);
+      init();
     });
+
+    // ---- progress / countdown helpers (simulated) ----
+    function updateProgressBar(){
+      const pct = Math.min(100, Math.round((simulatedRaisedUSD / simulatedGoalUSD) * 100));
+      $('barFill').style.width = pct + '%';
+    }
+    function simulateRaised(amountNative){
+      // fake rate: 1 ETH = $1800 ; 1 BNB = $300 — approximate; choose by network
+      provider.getNetwork().then(net=>{
+        let rate = 1800;
+        if(net.chainId===56 || net.name.toLowerCase().includes('bsc')) rate = 300;
+        const add = (amountNative * rate);
+        simulatedRaisedUSD += Math.round(add);
+        $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`;
+        updateProgressBar();
+      }).catch(()=>{ simulatedRaisedUSD += Math.round(amountNative*1800); $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`; updateProgressBar(); });
+    }
+
+    function startCountdown(){
+      function tick(){
+        const now = new Date();
+        let diff = Math.max(0, saleEndDate - now);
+        if(diff<=0){
+          $('countdown').innerText = 'Finalizada';
+          $('buyBtn').disabled = true;
+          return;
+        }
+        const days = Math.floor(diff / (1000*60*60*24));
+        diff -= days*(1000*60*60*24);
+        const hours = Math.floor(diff/(1000*60*60));
+        diff -= hours*(1000*60*60);
+        const minutes = Math.floor(diff/(1000*60));
+        diff -= minutes*(1000*60);
+        const seconds = Math.floor(diff/1000);
+        $('countdown').innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      }
+      tick();
+      setInterval(tick,1000);
+    }
+
   </script>
 </body>
 </html>
