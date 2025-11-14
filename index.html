@@ -1,570 +1,625 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preventa Oficial - Proyecto</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.3.0/dist/ethers.umd.min.js"></script>
-  <style>
-    body {
-      background: radial-gradient(circle at top, #141414, #000);
-      color: #fff;
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 50px 20px;
-    }
-
-    #walletInfo {
-      position: fixed;
-      top: 15px;
-      right: 15px;
-      background: rgba(255,255,255,0.05);
-      padding: 8px 15px;
-      border-radius: 15px;
-      font-size: 0.9em;
-      border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(5px);
-    }
-
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 40px 25px;
-      max-width: 400px;
-      margin: 80px auto 0 auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-      backdrop-filter: blur(8px);
-      text-align: center;
-    }
-
-    h2 {
-      margin-bottom: 10px;
-    }
-
-    p {
-      color: #bbb;
-      font-size: 0.95em;
-    }
-
-    input {
-      width: 80%;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 12px;
-      border: none;
-      outline: none;
-      font-size: 1.1em;
-      text-align: center;
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-
-    button {
-      background: linear-gradient(90deg, #00ffa3, #0072ff);
-      border: none;
-      border-radius: 15px;
-      padding: 12px 25px;
-      font-size: 1.1em;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-      width: 85%;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 10px #00ffa3;
-    }
-
-    #status {
-      margin-top: 15px;
-      font-size: 0.9em;
-      color: #00ffa3;
-    }
-
-    #balance {
-      margin-top: 10px;
-      font-size: 0.9em;
-      color: #00ffd0;
-    }
-  </style>
-</head>
-<body>
-  <!-- Wallet conectado -->
-  <div id="walletInfo">Conectando wallet...</div>
-
-  <div class="card">
-    <h2>🚀 Preventa Oficial</h2>
-    <p>Introduce la cantidad que deseas aportar (ETH / BNB)</p>
-    <input type="number" id="amount" placeholder="Ej: 0.2">
-    <br>
-    <button onclick="participar()">Participar</button>
-    <p id="status"></p>
-    <p id="balance"></p>
-  </div>
-
-  <script>
-    const walletProyecto = "0xTuWalletAqui"; // 🔹 Reemplaza con tu wallet
-    let signer;
-    let provider;
-
-    // función para conectar la wallet al cargar
-<!DOCTYPE html>
-<html lang="es">
-<head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>LunaCore • Preventa</title>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.3.0/dist/ethers.umd.min.js"></script>
+  <title>CORTEXIA Protocol — Preventa (Demo)</title>
+
+  <!-- Ethers v6 UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.0/dist/ethers.umd.min.js"></script>
+
   <style>
+    /* ---------- Palette & base ---------- */
     :root{
-      --bg1:#07070b;
-      --bg2:#0f1220;
-      --glass: rgba(255,255,255,0.04);
-      --accent1: #7af3c6;
-      --accent2: #6aa8ff;
-      --muted: #9aa3b2;
-      --card-radius: 18px;
-      --maxw: 1100px;
-      --container-padding: 20px;
+      --bg-dark:#0A0A0A;
+      --panel:#0f1724;
+      --neon1:#0066FF;
+      --neon2:#00D4FF;
+      --muted:#9aa3b2;
+      --glass: rgba(255,255,255,0.03);
+      --card-radius:18px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: Inter, Poppins, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg,var(--bg1),var(--bg2));
-      color: #eaf2ff;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      min-height:100vh;
-      padding:30px 16px;
-      display:flex;
-      justify-content:center;
-    }
-    .wrap{
-      width:100%;
-      max-width:var(--maxw);
-    }
-    header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:24px;
-    }
-    .brand{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .logo{
-      width:48px;height:48px;border-radius:12px;
-      background: linear-gradient(135deg,var(--accent1),var(--accent2));
-      display:flex;align-items:center;justify-content:center;
-      font-weight:700;color:#041024;
-      box-shadow:0 6px 30px rgba(106,168,255,0.08),0 3px 8px rgba(122,243,198,0.04);
-    }
-    .title{font-weight:700;font-size:1.05rem}
-    nav{display:flex;gap:12px;align-items:center}
-    .small-btn{
-      padding:8px 12px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);
-      font-size:0.9rem;color:var(--muted)
-    }
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;font-family:Inter, "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:linear-gradient(180deg,#000000 0%, #071021 100%); color:#e8f4ff;}
+    a{color:var(--neon2)}
+    .container{max-width:1200px;margin:0 auto;padding:18px;}
+
+    /* ---------- header ---------- */
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 4px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--neon1),var(--neon2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#021229;box-shadow:0 8px 30px rgba(0,102,255,0.12)}
+    .brand h1{margin:0;font-size:1.05rem}
+    .sub{color:var(--muted);font-size:0.86rem}
 
     /* wallet chip */
-    #walletInfo{
-      padding:8px 12px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);
-      font-size:0.9rem;color:#dffcf0;backdrop-filter:blur(6px);
-      display:flex;gap:8px;align-items:center;
-    }
-    #walletInfo .dot{width:8px;height:8px;border-radius:50%;background:#00ffad;box-shadow:0 0 6px #00ffad}
+    #walletChip{padding:8px 12px;border-radius:14px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);font-family:monospace;display:flex;gap:10px;align-items:center}
+    #walletChip .dot{width:9px;height:9px;border-radius:50%}
 
-    /* main layout */
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 420px;
-      gap:24px;
-      align-items:start;
-    }
+    /* ---------- layout ---------- */
+    .hero{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start;margin-top:18px}
+    @media (max-width:980px){ .hero{grid-template-columns:1fr; padding-bottom:40px} }
 
-    /* left column (info) */
-    .hero{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius: var(--card-radius);
-      padding:28px;
-      border: 1px solid rgba(255,255,255,0.03);
-      box-shadow: 0 10px 40px rgba(6,10,20,0.6);
-      overflow:hidden;
-    }
-    .hero h1{margin:0;font-size:1.8rem;letter-spacing:-0.5px}
-    .muted{color:var(--muted);margin-top:8px;}
-    .grid-2{
-      display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px;
-    }
-    .panel{
-      background:var(--glass);padding:16px;border-radius:14px;border:1px solid rgba(255,255,255,0.03);
-    }
-    .panel h3{margin:0;font-size:0.95rem}
-    .panel p{margin:8px 0 0;color:var(--muted);font-size:0.9rem}
+    /* ---------- left hero content ---------- */
+    .hero-left{padding:26px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);position:relative; overflow:hidden}
+    .slogan{font-size:1.6rem;line-height:1.05;margin:0 0 8px}
+    .lead{color:var(--muted);margin-bottom:14px}
+    .cta-row{display:flex;gap:12px;flex-wrap:wrap}
 
-    /* presale card (right column) */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-      border-radius: var(--card-radius);
-      padding:20px;
-      border:1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.6);
-      position:sticky; top:26px;
-    }
-    .card h2{margin:0;font-size:1.15rem}
-    .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;}
-    .price{font-weight:700}
-    .meta{color:var(--muted);font-size:0.9rem}
+    .btn-primary{background:linear-gradient(90deg,var(--neon1),var(--neon2));color:#021229;padding:12px 18px;border-radius:12px;border:none;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,116,255,0.08)}
+    .btn-ghost{padding:10px 14px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--neon2);cursor:pointer}
 
-    input[type=number]{
-      width:100%;padding:12px;border-radius:12px;border:none;outline:none;margin-top:12px;
-      background: rgba(255,255,255,0.02); color: #e9f7ff; font-size:1rem;
-    }
-    .btn{
-      width:100%;padding:12px;margin-top:12px;border-radius:12px;border:none;font-weight:700;font-size:1rem;cursor:pointer;
-      background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:#041024;
-      box-shadow:0 8px 30px rgba(106,168,255,0.08);
-    }
-    .status{margin-top:10px;font-size:0.95rem;color:var(--accent1)}
+    .cards-row{display:flex;gap:12px;margin-top:18px;flex-wrap:wrap}
+    .info-card{flex:1;min-width:160px;background:var(--glass);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .info-card h4{margin:0 0 6px}
 
-    /* progress & timer */
-    .progress-wrap{margin-top:14px}
-    .bar{width:100%;height:12px;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
-    .bar-fill{height:100%;width:30%;background:linear-gradient(90deg,var(--accent1),var(--accent2));transition:width 600ms cubic-bezier(.2,.8,.2,1)}
-    .small{font-size:0.85rem;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between}
+    /* ---------- presale card (right) ---------- */
+    .presale-card{background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border-radius:18px; padding:18px; border:1px solid rgba(255,255,255,0.04); box-shadow:0 14px 40px rgba(2,10,30,0.6); position:sticky; top:20px;}
+    .presale-card h2{margin:0;font-size:1.1rem}
+    .meta{color:var(--muted);font-size:0.9rem;margin-top:6px}
+    .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .price-big{font-weight:800;font-size:1.05rem;color:var(--neon2)}
 
-    /* footer sections */
-    .section{margin-top:22px}
+    input[type=number]{width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,0.02);color:#eaf6ff;margin-top:12px;font-size:1rem}
+    .small-muted{color:var(--muted);font-size:0.86rem;margin-top:6px}
+
+    .buy-btn{width:100%;padding:12px;border-radius:12px;border:none;margin-top:12px;cursor:pointer;font-weight:800;background:linear-gradient(90deg,var(--neon1),var(--neon2));color:#021229}
+    .buy-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+    .progress{margin-top:14px}
+    .bar{width:100%;height:12px;background:rgba(255,255,255,0.03);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .bar-fill{height:100%;background:linear-gradient(90deg,var(--neon1),var(--neon2));width:28%;transition:width 600ms ease}
+
+    .token-output{margin-top:8px;font-weight:700;font-family:monospace;color:var(--neon2)}
+
+    .contract{margin-top:12px;font-size:0.82rem;color:var(--muted);word-break:break-all}
+
+    /* modal */
+    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:50;display:none}
+    .modal{background:linear-gradient(180deg, #081226, #041123);padding:18px;border-radius:14px;border:1px solid rgba(255,255,255,0.04);width:90%;max-width:480px;color:#eaf6ff}
+    .modal h3{margin:0;font-size:1.05rem}
+    .modal .muted{color:var(--muted);margin-top:8px}
+
+    /* footer & sections */
+    section{margin-top:18px}
     .tokonomics{display:flex;gap:12px;flex-wrap:wrap}
-    .tbox{flex:1;min-width:150px;background:rgba(255,255,255,0.02);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
+    .chart{width:260px;height:260px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.03)}
+    .roadmap{display:flex;gap:12px;flex-wrap:wrap}
+    .roadmap .step{background:var(--glass);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);min-width:150px}
 
-    footer{margin-top:30px;color:var(--muted);font-size:0.9rem;text-align:center}
+    footer{margin-top:24px;padding:12px;color:var(--muted);font-size:0.9rem;text-align:center}
 
-    /* responsive */
-    @media (max-width:980px){
-      .grid{grid-template-columns:1fr; padding-bottom:60px}
-      .card{position:relative;top:0}
-    }
+    /* particle canvas overlay */
+    #bgCanvas { position:fixed; inset:0; z-index:-1; }
+    .neural-lines { position:absolute; inset:0; pointer-events:none; z-index:0 }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <canvas id="bgCanvas"></canvas>
+
+  <div class="container">
     <header>
       <div class="brand">
-        <div class="logo">LC</div>
+        <div class="logo">CX</div>
         <div>
-          <div class="title">LunaCore</div>
-          <div class="muted" style="font-size:0.85rem">Token • Preventa Fase 1</div>
+          <h1>CORTEXIA</h1>
+          <div class="sub">Protocolo DePIN + AI • Preventa demo</div>
         </div>
       </div>
 
-      <nav>
-        <div class="small-btn">Tokenomics</div>
-        <div class="small-btn">Roadmap</div>
-        <div id="walletInfo">Conectando wallet...</div>
-      </nav>
+      <div id="walletChip">
+        <div class="dot" id="dot"></div>
+        <div id="chipText">Conectando wallet...</div>
+      </div>
     </header>
 
-    <main class="grid">
-      <!-- LEFT: info -->
-      <section class="hero">
-        <h1>LunaCore — Token de infraestructura para IA on-chain</h1>
-        <p class="muted">Ecosistema tokenizado para modelos de IA verificados. Preventa exclusiva: fase 1 con bonificaciones por early adopters.</p>
+    <main class="hero">
+      <!-- LEFT -->
+      <div class="hero-left">
+        <h2 class="slogan">Descentraliza la inteligencia. Democratiza el poder.</h2>
+        <p class="lead">La red neuronal descentralizada que entrena, valida y monetiza inteligencia artificial. Contribuye al cómputo, entrena modelos y recibe $CORTEX.</p>
 
-        <div class="grid-2">
-          <div class="panel">
-            <h3>Oferta total</h3>
-            <p>1,000,000 LCore</p>
+        <div class="cta-row">
+          <button class="btn-primary" id="jumpToPresale">Únete a la preventa</button>
+          <button class="btn-ghost" id="openWhitepaper">Whitepaper</button>
+        </div>
+
+        <div class="cards-row">
+          <div class="info-card">
+            <h4>Red DePIN + AI</h4>
+            <p class="small-muted">Aporta poder computacional y recibe recompensas.</p>
           </div>
-          <div class="panel">
-            <h3>Red</h3>
-            <p>Compatible con Ethereum y Binance Smart Chain (selecciona en tu wallet)</p>
+          <div class="info-card">
+            <h4>Arquitectura L2</h4>
+            <p class="small-muted">EigenDA • Arweave • Filecoin • Chainlink</p>
+          </div>
+          <div class="info-card">
+            <h4>Tokenomics</h4>
+            <p class="small-muted">Preventa 30% • Supply 1,000,000,000 $CORTEX</p>
           </div>
         </div>
 
-        <div class="section">
-          <h3 style="margin-bottom:8px">¿Por qué LunaCore?</h3>
-          <p class="muted">LunaCore permite a desarrolladores desplegar modelos de IA en cadena con oráculos descentralizados y micropagos por consulta.</p>
-        </div>
-
-        <div class="section">
-          <h3>Roadmap</h3>
-          <div class="tokonomics" style="margin-top:10px">
-            <div class="tbox">
-              <strong>Q3 2025</strong>
-              <div class="muted">Preventa & auditoría inicial</div>
+        <section class="tokonomics">
+          <div style="flex:1;">
+            <h3>Tokenomics</h3>
+            <p class="small-muted">Distribución clara y vestings protegidos.</p>
+            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+              <div style="min-width:130px;background:var(--glass);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)">
+                <strong>30%</strong><div class="small-muted">Preventa</div>
+              </div>
+              <div style="min-width:130px;background:var(--glass);padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)">
+                <strong>30%</strong><div class="small-muted">Nodos/Recompensas</div>
+              </div>
             </div>
-            <div class="tbox">
-              <strong>Q4 2025</strong>
-              <div class="muted">Mainnet beta & partnerships</div>
-            </div>
-            <div class="tbox">
-              <strong>Q1 2026</strong>
-              <div class="muted">Listing & staking</div>
-            </div>
           </div>
-        </div>
 
-        <div class="section">
-          <h3>Tokenomics</h3>
-          <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-            <div class="tbox"><strong>Preventa</strong><div class="muted">25%</div></div>
-            <div class="tbox"><strong>Liquidity</strong><div class="muted">30%</div></div>
-            <div class="tbox"><strong>Equipo</strong><div class="muted">15% (vested)</div></div>
-            <div class="tbox"><strong>Marketing</strong><div class="muted">10%</div></div>
+          <div class="chart" id="pieHolder">
+            <canvas id="pieCanvas" width="260" height="260"></canvas>
           </div>
-        </div>
+        </section>
 
-        <div class="section">
-          <h3>FAQ</h3>
-          <p class="muted">¿Cuándo recibiré los tokens? → Al finalizar la preventa y creación del token. ¿Puedo usar ETH o BNB? → Sí, la wallet detectará la red.</p>
-        </div>
+        <section class="roadmap">
+          <div style="flex-basis:100%">
+            <h3>Roadmap</h3>
+          </div>
+          <div class="step"><strong>Q1 2026</strong><div class="small-muted">MVP Testnet</div></div>
+          <div class="step"><strong>Q3 2026</strong><div class="small-muted">Train-to-Earn</div></div>
+          <div class="step"><strong>Q1 2027</strong><div class="small-muted">DAO</div></div>
+          <div class="step"><strong>Q3 2027</strong><div class="small-muted">Mainnet</div></div>
+        </section>
 
-      </section>
+      </div>
 
-      <!-- RIGHT: presale card -->
-      <aside class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
+      <!-- RIGHT / PRESALE -->
+      <aside class="presale-card" id="presaleCard">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
           <div>
-            <h2>🚀 Preventa — Fase 1</h2>
-            <div class="meta">Bonificación: 10% (early)</div>
+            <h2>🚀 Preventa Oficial — Fase 1</h2>
+            <div class="meta">Bonificación early: 10%</div>
           </div>
           <div style="text-align:right">
             <div class="meta">Precio</div>
-            <div class="price">1 LCore = 0.002 ETH</div>
+            <div class="price-big">1 ETH = 15,000 $CORTEX</div>
           </div>
         </div>
 
-        <div class="price-row" style="margin-top:12px">
-          <div class="meta">Disponible en preventa</div>
-          <div class="meta" id="networkLabel">Red: —</div>
+        <div class="price-row">
+          <div class="meta">Mínimo: 0.1 ETH • Máximo: 5 ETH</div>
+          <div class="meta" id="hardcapLabel">Hardcap: 5,000 ETH</div>
         </div>
 
-        <div style="margin-top:12px">
-          <input id="amount" type="number" min="0" step="0.001" placeholder="Ej: 0.1" />
-          <button class="btn" id="buyBtn">Participar</button>
-          <div class="status" id="status">Estado: esperando conexión...</div>
-        </div>
+        <div style="margin-top:10px">
+          <input id="amountInput" type="number" min="0.1" step="0.01" placeholder="Cantidad en ETH (ej. 0.25)" />
+          <div class="token-output" id="tokenOutput">Recibirás: — $CORTEX</div>
+          <div class="small-muted" id="balanceLabel">Saldo: —</div>
 
-        <div class="progress-wrap">
-          <div class="bar"><div class="bar-fill" id="barFill" style="width:28%"></div></div>
-          <div class="small">
-            <div id="raisedTxt">Recaudado: 28,000 USDT (simulado)</div>
-            <div id="goalTxt">Meta: 100,000 USDT</div>
+          <button class="buy-btn" id="buyBtn">🔌 Conectar Wallet</button>
+
+          <div class="progress">
+            <div class="bar"><div id="barFill" class="bar-fill"></div></div>
+            <div style="display:flex;justify-content:space-between;margin-top:8px">
+              <div class="small-muted" id="raisedTxt">Recaudado: $28,000 (simulado)</div>
+              <div class="small-muted" id="goalTxt">Meta: $100,000</div>
+            </div>
+            <div class="small-muted" style="margin-top:8px">Tiempo restante: <strong id="countdown">30d 0h 0m</strong></div>
           </div>
-          <div style="margin-top:8px" class="meta">Tiempo restante: <strong id="countdown">—</strong></div>
-        </div>
 
-        <div style="margin-top:12px;font-size:0.92rem">
-          <div class="meta">Wallet destino:</div>
-          <div id="projectWallet" style="word-break:break-all;font-weight:700;margin-top:6px">0x1111111111111111111111111111111111111111</div>
-        </div>
-
-        <div style="margin-top:12px">
-          <div class="meta">Tu saldo:</div>
-          <div id="balance">—</div>
+          <div class="contract">Contrato: <span id="contractAddr" style="font-family:monospace">0x742...CortexiaPresale</span></div>
         </div>
       </aside>
     </main>
 
     <footer>
-      <div style="opacity:0.9">Proyecto ficticio para previsualización • No envíes fondos reales a menos que verifiques la wallet del proyecto.</div>
+      cortexia.ai • @cortexia_ai • github.com/cortexia • t.me/cortexiadao — <span style="color:var(--muted)">Disclaimer: Cripto conlleva riesgos. Investiga antes de invertir.</span>
     </footer>
   </div>
 
+  <!-- Modal -->
+  <div id="modal" class="modal-back">
+    <div class="modal">
+      <h3 id="modalTitle">Confirmar compra</h3>
+      <div id="modalBody" class="muted">Detalles...</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px">
+        <button class="btn-ghost" id="modalClose">Cancelar</button>
+        <button class="btn-primary" id="modalConfirm">Confirmar en MetaMask</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // -------------------------
-    // CONFIGURACIÓN (edita si quieres)
-    // -------------------------
-    // Dirección del proyecto (ficticia aquí). Reemplaza por tu dirección real cuando publiques.
-    const walletProyecto = "0x1111111111111111111111111111111111111111";
-    // Fecha de fin de preventa (a futuro) para el contador (YYYY, M-1, D, H, M, S)
-    const saleEndDate = new Date(Date.now() + 1000*60*60*24*7); // +7 días desde carga (demo)
-    // Datos simulados de recaudación (solo para UI)
+    /*****************************************************************
+     * Demo Landing + Presale integrated with MetaMask (ethers v6)
+     * - Replace PRESALE_ADDRESS with your real presale address
+     * - Test in MetaMask mobile browser or desktop with MetaMask extension
+     *****************************************************************/
+    const PRESALE_ADDRESS = "0x7420000000000000000000CortexiaPresale"; // <- REPLACE for production
+    const TOKEN_PER_ETH = 15000; // 1 ETH = 15,000 CORTEX
+    const MIN_ETH = 0.1;
+    const MAX_ETH = 5;
+    const HARDCAP_ETH = 5000;
+    const SALE_DURATION_MS = 1000 * 60 * 60 * 24 * 30; // 30 days demo
+
+    // UI refs
+    const chip = document.getElementById('chipText');
+    const dot = document.getElementById('dot');
+    const buyBtn = document.getElementById('buyBtn');
+    const amountInput = document.getElementById('amountInput');
+    const tokenOutput = document.getElementById('tokenOutput');
+    const balanceLabel = document.getElementById('balanceLabel');
+    const barFill = document.getElementById('barFill');
+    const raisedTxt = document.getElementById('raisedTxt');
+    const countdownEl = document.getElementById('countdown');
+    const contractAddrEl = document.getElementById('contractAddr');
+
+    // modal elements
+    const modalBack = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalConfirm = document.getElementById('modalConfirm');
+    const modalClose = document.getElementById('modalClose');
+
+    // simulated state
     let simulatedRaisedUSD = 28000;
     const simulatedGoalUSD = 100000;
+    let saleEnds = Date.now() + SALE_DURATION_MS;
 
-    // -------------------------
-    // UTILIDADES
-    // -------------------------
-    const $ = (id)=> document.getElementById(id);
-    function short(addr){ if(!addr) return '—'; return addr.slice(0,6)+'…'+addr.slice(-4); }
-    function nice(n,dec=4){ return Number(n).toLocaleString(undefined,{maximumFractionDigits:dec}); }
+    // ethers
+    let provider = null;
+    let signer = null;
+    let currentAddress = null;
+    let currentNetwork = null;
 
-    // -------------------------
-    // Ethers / Wallet logic
-    // -------------------------
-    let provider, signer, currentAddress;
-    const networkNames = {
-      1: 'Ethereum',
-      3: 'Ropsten',
-      4: 'Rinkeby',
-      5: 'Goerli',
-      56: 'BSC',
-      97: 'BSC Test',
-      137: 'Polygon'
-    };
+    contractAddrEl.innerText = PRESALE_ADDRESS;
 
-    async function init() {
-      // show project wallet
-      $('projectWallet').innerText = walletProyecto;
-
-      // set initial UI
-      $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`;
-      $('goalTxt').innerText = `Meta: $${simulatedGoalUSD.toLocaleString()}`;
-      updateProgressBar();
-
-      // countdown
-      startCountdown();
-
-      // try connect if wallet present
-      if(window.ethereum){
-        try {
-          provider = new ethers.BrowserProvider(window.ethereum);
-          // if user already connected, request accounts; else still attempt to request but avoid popup under some wallets
-          await provider.send("eth_requestAccounts", []);
-          signer = await provider.getSigner();
-          currentAddress = await signer.getAddress();
-          await updateConnectedUI();
-        } catch(err){
-          // user may have rejected or wallet blocks auto-request
-          $('walletInfo').innerText = 'Conectar wallet';
-          $('status').innerText = 'Estado: por favor conecta tu wallet (botón de la app).';
-        }
-        // listen to account / chain changes
-        try {
-          window.ethereum.on && window.ethereum.on('accountsChanged', handleAccountsChanged);
-          window.ethereum.on && window.ethereum.on('chainChanged', handleChainChanged);
-        } catch(e){}
-      } else {
-        $('walletInfo').innerText = 'Wallet no detectada';
-        $('status').innerText = 'Estado: abre esta página dentro del navegador de MetaMask/Trust Wallet.';
-      }
+    // --------------- helpers ----------------
+    const short = (addr)=> addr ? `${addr.slice(0,6)}…${addr.slice(-4)}` : '—';
+    const nice = (n, d=4)=> Number(n).toLocaleString(undefined,{maximumFractionDigits:d});
+    function showConnected(addr, bal, netName){
+      chip.innerText = `${short(addr)} ✓ Conectado`;
+      dot.style.background = '#00ffad';
+      balanceLabel.innerText = `Saldo: ${nice(bal,6)} ${netName==='BSC' ? 'BNB' : 'ETH'}`;
+      buyBtn.innerText = 'Participar en la Preventa';
+      buyBtn.disabled = false;
+    }
+    function showDisconnected(){
+      chip.innerText = 'Wallet no conectada';
+      dot.style.background = '#ff6b6b';
+      balanceLabel.innerText = 'Saldo: —';
+      buyBtn.innerText = '🔌 Conectar Wallet';
+      buyBtn.disabled = false;
     }
 
-    async function updateConnectedUI(){
-      if(!signer) return;
-      currentAddress = await signer.getAddress();
-      $('walletInfo').innerHTML = `<div style="display:flex;align-items:center;gap:8px"><div class="dot"></div>${short(currentAddress)} ✓ Conectado</div>`;
-      // network
-      const net = await provider.getNetwork();
-      const netName = networkNames[net.chainId] || ('Chain '+net.chainId);
-      $('networkLabel').innerText = `Red: ${netName}`;
-      // balance
-      const bal = await provider.getBalance(currentAddress);
-      const balEth = ethers.formatEther(bal);
-      $('balance').innerText = `${nice(balEth,6)} ${netName==='BSC' || net.chainId===56 ? 'BNB' : 'ETH'}`;
-      $('status').innerText = 'Estado: wallet conectada. Listo para participar.';
+    // update tokens preview
+    function updateTokenPreview(){
+      const val = parseFloat(amountInput.value);
+      if(!val || val<=0){ tokenOutput.innerText = 'Recibirás: — $CORTEX'; return; }
+      const tokens = val * TOKEN_PER_ETH;
+      tokenOutput.innerText = `Recibirás: ${nice(tokens,0)} $CORTEX`;
     }
 
-    async function handleAccountsChanged(accounts){
-      if(!accounts || accounts.length===0){
-        // disconnected
-        signer = null; currentAddress = null;
-        $('walletInfo').innerText = 'Wallet desconectada';
-        $('status').innerText = 'Estado: wallet desconectada.';
-        $('balance').innerText = '—';
-      } else {
-        // update signer/provider and UI
-        provider = new ethers.BrowserProvider(window.ethereum);
-        signer = await provider.getSigner();
-        await updateConnectedUI();
-      }
-    }
-
-    async function handleChainChanged(){
-      // chain changed -> update network label and balance
-      if(provider && signer) await updateConnectedUI();
-    }
-
-    // -------------------------
-    // BUY / SEND TX
-    // -------------------------
-    async function participate(){
-      try {
-        if(!window.ethereum){
-          alert('No se detectó wallet. Abre esta página dentro del navegador de MetaMask o Trust Wallet.');
-          return;
-        }
-        if(!signer){
-          provider = new ethers.BrowserProvider(window.ethereum);
-          await provider.send("eth_requestAccounts", []);
-          signer = await provider.getSigner();
-          await updateConnectedUI();
-        }
-        const raw = document.querySelector('#amount').value;
-        const amount = Number(raw);
-        if(!amount || amount <= 0){ $('status').innerText = '❗ Ingresa una cantidad válida.'; return; }
-
-        $('status').innerText = '⏳ Enviando transacción...';
-        // parse amount as native currency (ETH/BNB)
-        const tx = await signer.sendTransaction({
-          to: walletProyecto,
-          value: ethers.parseEther(amount.toString())
-        });
-        // wait for confirm
-        await tx.wait();
-        $('status').innerText = '✅ Transacción completada. ¡Gracias por participar!';
-        // update simulated raised (just for demo): add amount * fake price
-        simulateRaised(amount);
-        // refresh balance
-        await updateConnectedUI();
-      } catch(e){
-        console.error(e);
-        $('status').innerText = '❌ Error o transacción cancelada.';
-      }
-    }
-
-    // attach buy button
-    document.addEventListener('DOMContentLoaded', ()=>{
-      $('buyBtn').addEventListener('click', participate);
-      init();
-    });
-
-    // ---- progress / countdown helpers (simulated) ----
-    function updateProgressBar(){
+    // progress bar simulation
+    function updateProgressUI(){
       const pct = Math.min(100, Math.round((simulatedRaisedUSD / simulatedGoalUSD) * 100));
-      $('barFill').style.width = pct + '%';
-    }
-    function simulateRaised(amountNative){
-      // fake rate: 1 ETH = $1800 ; 1 BNB = $300 — approximate; choose by network
-      provider.getNetwork().then(net=>{
-        let rate = 1800;
-        if(net.chainId===56 || net.name.toLowerCase().includes('bsc')) rate = 300;
-        const add = (amountNative * rate);
-        simulatedRaisedUSD += Math.round(add);
-        $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`;
-        updateProgressBar();
-      }).catch(()=>{ simulatedRaisedUSD += Math.round(amountNative*1800); $('raisedTxt').innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`; updateProgressBar(); });
+      barFill.style.width = pct + '%';
+      raisedTxt.innerText = `Recaudado: $${simulatedRaisedUSD.toLocaleString()}`;
     }
 
+    // countdown
     function startCountdown(){
       function tick(){
-        const now = new Date();
-        let diff = Math.max(0, saleEndDate - now);
-        if(diff<=0){
-          $('countdown').innerText = 'Finalizada';
-          $('buyBtn').disabled = true;
-          return;
-        }
+        const diff = Math.max(0, saleEnds - Date.now());
+        if(diff<=0){ countdownEl.innerText = 'Finalizada'; buyBtn.disabled=true; return; }
         const days = Math.floor(diff / (1000*60*60*24));
-        diff -= days*(1000*60*60*24);
-        const hours = Math.floor(diff/(1000*60*60));
-        diff -= hours*(1000*60*60);
-        const minutes = Math.floor(diff/(1000*60));
-        diff -= minutes*(1000*60);
-        const seconds = Math.floor(diff/1000);
-        $('countdown').innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        const mins = Math.floor((diff%(1000*60*60))/(1000*60));
+        const secs = Math.floor((diff%(1000*60))/1000);
+        countdownEl.innerText = `${days}d ${hours}h ${mins}m ${secs}s`;
       }
       tick();
       setInterval(tick,1000);
     }
+
+    // ------------------ Wallet logic --------------------
+    async function tryAutoConnect(){
+      if(!window.ethereum){ showDisconnected(); chip.innerText='Abre en MetaMask/Trust Wallet'; return; }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      try {
+        // Try to request accounts (some wallets may block auto-popup; user may need to click)
+        await provider.send('eth_requestAccounts', []);
+        signer = await provider.getSigner();
+        currentAddress = await signer.getAddress();
+        const balance = await provider.getBalance(currentAddress);
+        const balEth = Number(ethers.formatEther(balance));
+        const net = await provider.getNetwork();
+        currentNetwork = net;
+        showConnected(currentAddress, balEth, net.name || net.chainId);
+      } catch(e){
+        // user not auto-connected or rejected -> default UI (they can click to connect)
+        console.warn('Autoconnect failed', e);
+        showDisconnected();
+      }
+
+      // listen for account/chain changes
+      if(window.ethereum && window.ethereum.on){
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+      }
+    }
+
+    async function connectWallet(){
+      if(!window.ethereum){ alert('Abre esta página dentro del navegador de MetaMask o Trust Wallet.'); return; }
+      provider = new ethers.BrowserProvider(window.ethereum);
+      try {
+        await provider.send('eth_requestAccounts', []);
+        signer = await provider.getSigner();
+        currentAddress = await signer.getAddress();
+        const bal = await provider.getBalance(currentAddress);
+        const balEth = Number(ethers.formatEther(bal));
+        const net = await provider.getNetwork();
+        currentNetwork = net;
+        showConnected(currentAddress, balEth, net.name || net.chainId);
+      } catch(e){
+        console.error(e);
+        showDisconnected();
+      }
+    }
+
+    async function handleAccountsChanged(accounts){
+      if(!accounts || accounts.length===0){
+        signer = null; currentAddress = null;
+        showDisconnected();
+      } else {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
+        currentAddress = await signer.getAddress();
+        const bal = await provider.getBalance(currentAddress);
+        const balEth = Number(ethers.formatEther(bal));
+        const net = await provider.getNetwork();
+        currentNetwork = net;
+        showConnected(currentAddress, balEth, net.name || net.chainId);
+      }
+    }
+
+    async function handleChainChanged(){
+      if(provider && signer) {
+        const net = await provider.getNetwork();
+        currentNetwork = net;
+        const bal = await provider.getBalance(currentAddress);
+        const balEth = Number(ethers.formatEther(bal));
+        showConnected(currentAddress, balEth, net.name || net.chainId);
+      }
+    }
+
+    // ------------------ Purchase flow --------------------
+    // validate amount and open modal
+    function openConfirmModal(amount){
+      const tokens = amount * TOKEN_PER_ETH;
+      modalTitle.innerText = 'Confirmar compra';
+      modalBody.innerHTML = `
+        <div class="muted">Vas a enviar <strong>${amount} ETH</strong></div>
+        <div class="muted" style="margin-top:6px">Recibirás: <strong style="font-family:monospace">${Math.round(tokens).toLocaleString()} $CORTEX</strong></div>
+        <div class="muted" style="margin-top:6px">Destino: <span style="font-family:monospace">${PRESALE_ADDRESS}</span></div>
+      `;
+      modalBack.style.display = 'flex';
+    }
+
+    async function sendTransaction(amount){
+      try {
+        if(!signer){
+          await connectWallet();
+          if(!signer){ throw new Error('Wallet no conectada'); }
+        }
+
+        modalConfirm.disabled = true;
+        modalConfirm.innerText = 'Abriendo MetaMask...';
+
+        // build tx
+        const value = ethers.parseEther(amount.toString()); // bigint
+        const txResponse = await signer.sendTransaction({
+          to: PRESALE_ADDRESS,
+          value
+        });
+
+        modalConfirm.innerText = 'Esperando confirmación...';
+        modalBody.innerHTML += `<div class="muted" style="margin-top:8px">Transacción enviada. Hash: <span style="font-family:monospace">${txResponse.hash}</span></div>`;
+
+        // wait for 1 confirmation
+        await txResponse.wait();
+        modalBody.innerHTML += `<div class="muted" style="margin-top:8px;color:#7affc9">🎉 Compra confirmada</div>`;
+        modalConfirm.innerText = '¡Hecho!';
+        modalConfirm.disabled = false;
+
+        // simulate adding raised (approx)
+        simulateRaised(amount);
+
+        // refresh balance
+        const bal = await provider.getBalance(currentAddress);
+        const balEth = Number(ethers.formatEther(bal));
+        showConnected(currentAddress, balEth, currentNetwork.name || currentNetwork.chainId);
+
+      } catch(err){
+        console.error(err);
+        modalBody.innerHTML += `<div class="muted" style="margin-top:8px;color:#ff9b9b">❌ Error: ${err.message || err}</div>`;
+        modalConfirm.disabled = false;
+        modalConfirm.innerText = 'Confirmar en MetaMask';
+      }
+    }
+
+    // simulate raised in USD using network rate (very rough)
+    async function simulateRaised(amountETH){
+      try {
+        const net = await provider.getNetwork();
+        let rate = 1800; // ETH -> USD approx
+        if(net.chainId===56) rate = 300; // BSC/BNB approximate
+        simulatedRaisedUSD += Math.round(amountETH * rate);
+        updateProgressUI();
+      } catch(e){
+        simulatedRaisedUSD += Math.round(amountETH * 1800);
+        updateProgressUI();
+      }
+    }
+
+    // ------------------ UI hooks --------------------
+    amountInput.addEventListener('input', ()=> {
+      updateTokenPreview();
+      // inline validation highlight
+      const v = parseFloat(amountInput.value);
+      if(v && (v < MIN_ETH || v > MAX_ETH)){
+        amountInput.style.border = '1px solid #ff5a5a';
+      } else {
+        amountInput.style.border = 'none';
+      }
+    });
+
+    buyBtn.addEventListener('click', async ()=>{
+      // if not connected, connect first
+      if(!signer){
+        buyBtn.disabled = true;
+        buyBtn.innerText = 'Conectando...';
+        await connectWallet();
+        buyBtn.disabled = false;
+        return;
+      }
+
+      // wallet connected, proceed to buy
+      const raw = parseFloat(amountInput.value);
+      if(!raw || isNaN(raw)){ alert('Ingresa una cantidad válida en ETH'); return; }
+      if(raw < MIN_ETH){ alert(`Monto mínimo ${MIN_ETH} ETH`); return; }
+      if(raw > MAX_ETH){ alert(`Monto máximo ${MAX_ETH} ETH`); return; }
+
+      // check balance
+      const bal = Number(ethers.formatEther(await provider.getBalance(currentAddress)));
+      if(raw > bal){ alert('Fondos insuficientes'); return; }
+
+      // open modal
+      openConfirmModal(raw);
+    });
+
+    modalClose.addEventListener('click', ()=> {
+      modalBack.style.display = 'none';
+      modalBody.innerHTML = 'Detalles...';
+    });
+
+    modalConfirm.addEventListener('click', async ()=> {
+      // find amount from modal
+      const txt = amountInput.value;
+      const amount = parseFloat(txt);
+      if(!amount) return;
+      modalConfirm.disabled = true;
+      modalConfirm.innerText = 'Enviando...';
+      await sendTransaction(amount);
+    });
+
+    // button jump to presale
+    document.getElementById('jumpToPresale').addEventListener('click', ()=> {
+      document.getElementById('presaleCard').scrollIntoView({behavior:'smooth'});
+    });
+
+    document.getElementById('openWhitepaper').addEventListener('click', ()=> {
+      window.open('https://example.com/whitepaper.pdf','_blank');
+    });
+
+    // init
+    (function init(){
+      updateProgressUI();
+      startCountdown();
+      tryAutoConnect();
+    })();
+
+    /***********************
+     * Simple pie chart draw
+     ***********************/
+    (function drawPie(){
+      const canvas = document.getElementById('pieCanvas');
+      const ctx = canvas.getContext('2d');
+      const data = [
+        {label:'Preventa', val:30, color:'#00D4FF'},
+        {label:'Nodos', val:30, color:'#0066FF'},
+        {label:'Ecosistema', val:15, color:'#6AC9FF'},
+        {label:'DAO', val:10, color:'#3BA4FF'},
+        {label:'Equipo', val:10, color:'#1E7BFF'},
+        {label:'Airdrop', val:5, color:'#0E6B99'}
+      ];
+      const cx = canvas.width/2, cy = canvas.height/2, r = 100;
+      let start = -Math.PI/2;
+      ctx.font = '12px Inter';
+      data.forEach(d=>{
+        const slice = (d.val/100) * (Math.PI*2);
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy,r,start,start+slice);
+        ctx.closePath();
+        ctx.fillStyle = d.color;
+        ctx.fill();
+        start += slice;
+      });
+      // center label
+      ctx.fillStyle = '#eaf6ff';
+      ctx.textAlign='center';
+      ctx.fillText('Supply: 1,000,000,000',cx,cy+6);
+    })();
+
+    /***********************
+     * Background particle / neural lines simple
+     ***********************/
+    (function bgAnim(){
+      const canvas = document.getElementById('bgCanvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = innerWidth;
+      let h = canvas.height = innerHeight;
+      window.addEventListener('resize', ()=>{ w=canvas.width=innerWidth; h=canvas.height=innerHeight; });
+
+      const particles = [];
+      const N = Math.floor((w*h)/70000);
+      for(let i=0;i<N;i++){
+        particles.push({
+          x: Math.random()*w,
+          y: Math.random()*h,
+          vx: (Math.random()-0.5)*0.2,
+          vy: (Math.random()-0.5)*0.2,
+          r: 0.6 + Math.random()*1.4
+        });
+      }
+
+      function step(){
+        ctx.clearRect(0,0,w,h);
+        // subtle radial gradient
+        const grad = ctx.createLinearGradient(0,0,w,h);
+        grad.addColorStop(0,'rgba(0,20,40,0.12)');
+        grad.addColorStop(1,'rgba(0,0,0,0.4)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,w,h);
+
+        // draw lines between close particles
+        for(let i=0;i<particles.length;i++){
+          const pi = particles[i];
+          pi.x += pi.vx; pi.y += pi.vy;
+          if(pi.x<0) pi.x=w; if(pi.x>w) pi.x=0;
+          if(pi.y<0) pi.y=h; if(pi.y>h) pi.y=0;
+          for(let j=i+1;j<particles.length;j++){
+            const pj = particles[j];
+            const dx = pi.x-pj.x; const dy = pi.y-pj.y;
+            const d2 = dx*dx+dy*dy;
+            if(d2 < 20000){
+              const alpha = 0.12 * (1 - d2/20000);
+              ctx.beginPath();
+              ctx.moveTo(pi.x,pi.y);
+              ctx.lineTo(pj.x,pj.y);
+              ctx.strokeStyle = `rgba(0, 116, 255, ${alpha})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+          // draw particle
+          ctx.beginPath();
+          ctx.arc(pi.x,pi.y,pi.r,0,Math.PI*2);
+          ctx.fillStyle = 'rgba(0,212,255,0.08)';
+          ctx.fill();
+        }
+
+        requestAnimationFrame(step);
+      }
+      step();
+    })();
 
   </script>
 </body>
